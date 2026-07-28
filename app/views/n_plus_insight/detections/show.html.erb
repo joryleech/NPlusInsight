@@ -1,0 +1,56 @@
+<a class="crumb" href="<%= root_path %>">← All detections</a>
+<div class="row">
+  <div>
+    <h1><%= @detection.method %> <%= @detection.path %></h1>
+    <p class="muted"><%= @detection.query_count %> repeated queries · <%= @detection.total_ms %> ms total · <%= @detection.created_at %></p>
+  </div>
+  <span class="badge">N+1 detected</span>
+</div>
+
+<div class="grid">
+  <div class="stack">
+    <section>
+      <h2>Exact source location</h2>
+      <% if @detection.location %>
+        <p><%= @detection.location.path %>:<%= @detection.location.line %></p>
+        <pre class="source"><% @detection.location.snippet.each do |line| %><div class="<%= "active" if line[:active] %>"><b><%= line[:line] %></b><span><%= line[:text] %></span></div><% end %></pre>
+      <% else %>
+        <p class="muted">The query was captured, but no application stack frame was available.</p>
+      <% end %>
+    </section>
+
+    <section>
+      <h2>Repeated SQL shape</h2>
+      <pre><%= @detection.sql %></pre>
+    </section>
+
+    <section>
+      <h2>Suggested fixes</h2>
+      <% @detection.suggestions.each do |suggestion| %>
+        <div class="suggestion">
+          <div class="row"><h3><%= suggestion[:title] %></h3><span class="badge"><%= suggestion[:confidence] %> confidence</span></div>
+          <p class="muted"><%= suggestion[:explanation] %></p>
+          <pre><%= suggestion[:code] %></pre>
+        </div>
+      <% end %>
+    </section>
+  </div>
+
+  <section>
+    <h2>Affected model graph</h2>
+    <% models = @detection.models.presence || [{ name: "Unknown model", table: "unknown" }] %>
+    <% height = [models.length * 100, 240].max %>
+    <svg class="graph" viewBox="0 0 360 <%= height %>" role="img" aria-label="Models involved in the repeated query">
+      <% models.each_with_index do |model, index| %>
+        <% y = 25 + index * 100 %>
+        <% if index.positive? %><line x1="180" y1="<%= y - 50 %>" x2="180" y2="<%= y %>"/><% end %>
+        <rect x="70" y="<%= y %>" width="220" height="58" rx="9"/>
+        <text x="180" y="<%= y + 25 %>" text-anchor="middle"><%= model[:name] %></text>
+        <text x="180" y="<%= y + 44 %>" text-anchor="middle" opacity=".65"><%= model[:table] %></text>
+      <% end %>
+      <% @detection.edges.each_with_index do |edge, index| %>
+        <text x="190" y="<%= 20 + (index + 1) * 100 %>" opacity=".7"><%= edge[:association] %></text>
+      <% end %>
+    </svg>
+  </section>
+</div>
