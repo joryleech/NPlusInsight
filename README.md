@@ -1,12 +1,35 @@
 # NPlusInsight
 
-NPlusInsight is a development-only Rails gem that detects repeated query
+NPlusInsight is a Rails gem that detects repeated query
 shapes within a request and turns them into a useful debugging report:
 
 - the exact application file and line that issued the query;
 - a model/association graph for the tables involved;
 - normalized SQL, repetition count, and total query time;
 - suggested `includes` and `strict_loading` fixes.
+
+## Screenshots
+
+### On-page alert
+
+The corner indicator turns red and displays the number of N+1 query patterns
+detected while rendering the current page.
+
+![NPlusInsight on-page N+1 alert](docs/images/on-page-alert.png)
+
+### On-page findings popout
+
+Open the indicator to inspect the relevant source lines, affected model graph,
+and remediation suggestions without leaving the page.
+
+![NPlusInsight source location, model graph, and remediation popout](docs/images/on-page-popout.png)
+
+### Mounted findings dashboard
+
+The mounted dashboard collects recent findings across requests for deeper
+inspection.
+
+![NPlusInsight full findings dashboard](docs/images/full-dashboard.png)
 
 ## Install
 
@@ -15,6 +38,9 @@ Add the gem in every environment where you may enable it:
 ```ruby
 gem "n_plus_insight"
 ```
+
+Run `bundle install`, then configure NPlusInsight for the environments where it
+should be active.
 
 Then configure activation from the environment rather than tying it to a Rails
 environment name:
