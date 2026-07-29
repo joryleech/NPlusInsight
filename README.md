@@ -70,7 +70,7 @@ detected while rendering the current page.
 Open the indicator to inspect relevant source lines, affected models, and
 remediation suggestions without leaving the page.
 
-![NPlusInsight grouped query patterns and multi-model tree in the on-page inspector](docs/images/on-page-popout.png)
+![NPlusInsight grouped query patterns and multi-model tree in the on-page inspector](docs/images/on-page-popout-modeled.png)
 
 ### Mounted findings dashboard
 
@@ -359,11 +359,6 @@ When proposing a change:
 
 Please avoid including production SQL, source code, credentials, or other
 sensitive application data in public issues.
-
-## Releasing
-
-Maintainer release instructions are available in
-[RELEASING.md](RELEASING.md).
 
 ## License
 
