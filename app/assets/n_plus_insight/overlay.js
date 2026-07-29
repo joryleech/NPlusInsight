@@ -34,6 +34,15 @@
   }
 
   var findings = decodePayload(root.dataset.payload || "");
+  var initialFindingIndex = findings.reduce(function (bestIndex, finding, index) {
+    var best = findings[bestIndex];
+    var patternCount = queryGroupsFor(finding).length;
+    var bestPatternCount = best ? queryGroupsFor(best).length : -1;
+
+    if (patternCount > bestPatternCount) return index;
+    if (patternCount === bestPatternCount && finding.query_count > best.query_count) return index;
+    return bestIndex;
+  }, 0);
   var patternCount = findings.reduce(function (total, finding) {
     return total + queryGroupsFor(finding).length;
   }, 0);
@@ -214,8 +223,8 @@
 
     var finding = findings[index];
     renderSource(body, finding);
-    renderQueries(body, finding);
     renderGraph(body, finding);
+    renderQueries(body, finding);
     renderFixes(body, finding);
   }
 
@@ -234,7 +243,7 @@
     if (event.key === "Escape" && panel.getAttribute("aria-hidden") === "false") setOpen(false);
   });
 
-  renderFinding(0);
+  renderFinding(initialFindingIndex);
   root.appendChild(panel);
   root.appendChild(launcher);
 }());
