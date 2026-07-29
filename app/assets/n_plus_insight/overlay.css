@@ -100,7 +100,7 @@
 #n1v-root .n1v-heading { margin: 0 0 8px !important; color: var(--n1v-text) !important; font: 650 13px/1.3 ui-sans-serif, system-ui, sans-serif !important; }
 #n1v-root .n1v-location { margin: 0 0 8px !important; color: var(--n1v-muted) !important; overflow-wrap: anywhere !important; font: 12px/1.4 ui-monospace, SFMono-Regular, Consolas, monospace !important; }
 #n1v-root .n1v-code { display: block !important; max-width: 100% !important; margin: 0 !important; padding: 10px 0 !important; overflow: auto !important; border-radius: 8px !important; background: var(--n1v-code) !important; color: #e4e7ec !important; font: 12px/1.5 ui-monospace, SFMono-Regular, Consolas, monospace !important; white-space: pre !important; }
-#n1v-root .n1v-code > code { display: block !important; margin: 0 !important; padding: 0 12px !important; border: 0 !important; border-radius: 0 !important; background: transparent !important; color: inherit !important; font: inherit !important; white-space: inherit !important; }
+#n1v-root .n1v-code code { display: block !important; margin: 0 !important; padding: 0 12px !important; border: 0 !important; border-radius: 0 !important; background: transparent !important; color: inherit !important; font: inherit !important; white-space: inherit !important; }
 #n1v-root .n1v-line { display: grid !important; grid-template-columns: 38px minmax(0, 1fr) !important; min-width: max-content !important; padding: 0 12px !important; }
 #n1v-root .n1v-line.n1v-active { background: rgba(217, 45, 32, .28) !important; }
 #n1v-root .n1v-line-number { color: #98a2b3 !important; user-select: none !important; }
