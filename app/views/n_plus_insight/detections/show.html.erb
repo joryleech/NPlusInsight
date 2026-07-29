@@ -71,13 +71,17 @@
               <% (group[:waterfall] || []).each do |query| %>
                 <% start_percent = [[query[:offset_ms].to_f / span_ms * 100, 0].max, 100].min %>
                 <% width_percent = [[query[:duration_ms].to_f / span_ms * 100, 0].max, 100 - start_percent].min %>
+                <% edge_class = start_percent < 20 ? "waterfall-bar-start" : (start_percent > 80 ? "waterfall-bar-end" : nil) %>
+                <% tooltip_id = "waterfall-tooltip-#{pattern_index}-#{query[:index]}" %>
                 <span
-                  class="waterfall-bar"
+                  class="waterfall-bar <%= edge_class %>"
                   style="--waterfall-start:<%= start_percent.round(4) %>%;--waterfall-width:<%= width_percent.round(4) %>%"
-                  title="Query <%= query[:index] %>: +<%= query[:offset_ms] %> ms, <%= query[:duration_ms] %> ms">
-                  <span class="sr-only">
-                    Pattern <%= pattern_index + 1 %>, query <%= query[:index] %>,
-                    started at <%= query[:offset_ms] %> milliseconds and took <%= query[:duration_ms] %> milliseconds
+                  tabindex="0"
+                  aria-describedby="<%= tooltip_id %>">
+                  <span class="waterfall-tooltip" id="<%= tooltip_id %>" role="tooltip">
+                    <strong>Query <%= query[:index] %></strong>
+                    <span><%= query[:duration_ms] %> ms</span>
+                    <small>Started +<%= query[:offset_ms] %> ms</small>
                   </span>
                 </span>
               <% end %>

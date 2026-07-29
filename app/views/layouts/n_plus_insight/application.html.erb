@@ -40,9 +40,21 @@
       .waterfall-label { min-width:0; padding:8px 0; }
       .waterfall-label strong,.waterfall-label small { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
       .waterfall-label small { color:var(--muted); font-size:11px; }
-      .waterfall-track { position:relative; height:22px; overflow:hidden; border-radius:5px; background:repeating-linear-gradient(90deg,var(--bg) 0,var(--bg) calc(25% - 1px),var(--line) 25%); }
+      .waterfall-track { position:relative; height:22px; overflow:visible; border-radius:5px; background:repeating-linear-gradient(90deg,var(--bg) 0,var(--bg) calc(25% - 1px),var(--line) 25%); }
       .waterfall-bar { position:absolute; top:3px; left:var(--waterfall-start); width:var(--waterfall-width); min-width:3px; height:16px; border-radius:4px; background:var(--accent); box-shadow:inset 0 0 0 1px rgba(255,255,255,.22); }
-      .waterfall-bar:hover { filter:brightness(1.15); }
+      .waterfall-bar:hover,.waterfall-bar:focus-visible { z-index:20; filter:brightness(1.15); outline:2px solid var(--accent); outline-offset:2px; }
+      .waterfall-tooltip { position:absolute; left:50%; bottom:calc(100% + 9px); z-index:30; display:grid; grid-template-columns:auto auto; gap:1px 12px; width:max-content; max-width:190px; padding:8px 10px; border:1px solid var(--line); border-radius:7px; background:var(--text); color:var(--panel); box-shadow:0 7px 20px rgba(0,0,0,.22); opacity:0; pointer-events:none; transform:translate(-50%,4px); transition:opacity .12s ease,transform .12s ease; font:11px/1.35 ui-sans-serif,system-ui,-apple-system,sans-serif; }
+      .waterfall-tooltip::after { content:""; position:absolute; top:100%; left:50%; border:5px solid transparent; border-top-color:var(--text); transform:translateX(-50%); }
+      .waterfall-tooltip strong { color:inherit; font-size:11px; }
+      .waterfall-tooltip > span { color:inherit; font-weight:700; text-align:right; }
+      .waterfall-tooltip small { grid-column:1 / -1; color:inherit; opacity:.72; }
+      .waterfall-bar:hover .waterfall-tooltip,.waterfall-bar:focus-visible .waterfall-tooltip { opacity:1; transform:translate(-50%,0); }
+      .waterfall-bar-start .waterfall-tooltip { left:0; transform:translate(0,4px); }
+      .waterfall-bar-start:hover .waterfall-tooltip,.waterfall-bar-start:focus-visible .waterfall-tooltip { transform:translate(0,0); }
+      .waterfall-bar-start .waterfall-tooltip::after { left:6px; transform:none; }
+      .waterfall-bar-end .waterfall-tooltip { right:0; left:auto; transform:translate(0,4px); }
+      .waterfall-bar-end:hover .waterfall-tooltip,.waterfall-bar-end:focus-visible .waterfall-tooltip { transform:translate(0,0); }
+      .waterfall-bar-end .waterfall-tooltip::after { right:6px; left:auto; transform:none; }
       .waterfall-total { color:var(--muted); font-size:12px; text-align:right; white-space:nowrap; }
       .sr-only { position:absolute!important; width:1px!important; height:1px!important; padding:0!important; margin:-1px!important; overflow:hidden!important; clip:rect(0,0,0,0)!important; white-space:nowrap!important; border:0!important; }
       .tree-wrap { overflow:auto; padding:4px 0; }
@@ -57,6 +69,7 @@
       .suggestion + .suggestion { border-top:1px solid var(--line); padding-top:18px; margin-top:18px; }
       .crumb { display:inline-block; margin-bottom:18px; }
       @media (max-width:760px) { .grid { grid-template-columns:1fr; } main, header div { width:min(100% - 20px,1120px); } .row { flex-direction:column; } .waterfall-axis { margin-left:88px; } .waterfall-row { grid-template-columns:76px minmax(130px,1fr) 56px; gap:7px; } }
+      @media (prefers-reduced-motion:reduce) { .waterfall-tooltip { transition:none; } }
     </style>
   </head>
   <body>

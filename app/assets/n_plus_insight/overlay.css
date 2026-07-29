@@ -112,9 +112,21 @@
 #n1v-root .n1v-waterfall-label { min-width: 0 !important; padding: 6px 0 !important; }
 #n1v-root .n1v-waterfall-label strong, #n1v-root .n1v-waterfall-label small { display: block !important; overflow: hidden !important; color: var(--n1v-text) !important; text-overflow: ellipsis !important; white-space: nowrap !important; font: 600 11px/1.35 ui-sans-serif, system-ui, sans-serif !important; }
 #n1v-root .n1v-waterfall-label small { color: var(--n1v-muted) !important; font-size: 10px !important; font-weight: 400 !important; }
-#n1v-root .n1v-waterfall-track { position: relative !important; height: 20px !important; overflow: hidden !important; border-radius: 5px !important; background: repeating-linear-gradient(90deg, var(--n1v-surface) 0, var(--n1v-surface) calc(25% - 1px), var(--n1v-border) 25%) !important; }
+#n1v-root .n1v-waterfall-track { position: relative !important; height: 20px !important; overflow: visible !important; border-radius: 5px !important; background: repeating-linear-gradient(90deg, var(--n1v-surface) 0, var(--n1v-surface) calc(25% - 1px), var(--n1v-border) 25%) !important; }
 #n1v-root .n1v-waterfall-bar { position: absolute !important; top: 3px !important; left: var(--n1v-waterfall-start) !important; width: var(--n1v-waterfall-width) !important; min-width: 3px !important; height: 14px !important; border-radius: 3px !important; background: var(--n1v-accent) !important; box-shadow: inset 0 0 0 1px rgba(255,255,255,.2) !important; }
-#n1v-root .n1v-waterfall-bar:hover { filter: brightness(1.15) !important; }
+#n1v-root .n1v-waterfall-bar:hover, #n1v-root .n1v-waterfall-bar:focus-visible { z-index: 20 !important; filter: brightness(1.15) !important; outline: 2px solid var(--n1v-accent) !important; outline-offset: 2px !important; }
+#n1v-root .n1v-waterfall-tooltip { position: absolute !important; left: 50% !important; bottom: calc(100% + 8px) !important; z-index: 30 !important; display: grid !important; grid-template-columns: auto auto !important; gap: 1px 10px !important; width: max-content !important; max-width: 180px !important; margin: 0 !important; padding: 7px 9px !important; border: 1px solid var(--n1v-border) !important; border-radius: 7px !important; background: var(--n1v-text) !important; color: var(--n1v-bg) !important; box-shadow: 0 7px 20px rgba(0,0,0,.25) !important; opacity: 0 !important; pointer-events: none !important; transform: translate(-50%,4px) !important; transition: opacity .12s ease,transform .12s ease !important; font: 10px/1.35 ui-sans-serif,system-ui,sans-serif !important; text-align: left !important; white-space: nowrap !important; }
+#n1v-root .n1v-waterfall-tooltip::after { content: "" !important; position: absolute !important; top: 100% !important; left: 50% !important; border: 5px solid transparent !important; border-top-color: var(--n1v-text) !important; transform: translateX(-50%) !important; }
+#n1v-root .n1v-waterfall-tooltip strong { margin: 0 !important; color: inherit !important; font: 650 10px/1.35 ui-sans-serif,system-ui,sans-serif !important; }
+#n1v-root .n1v-waterfall-tooltip > span { margin: 0 !important; color: inherit !important; font: 700 10px/1.35 ui-sans-serif,system-ui,sans-serif !important; text-align: right !important; }
+#n1v-root .n1v-waterfall-tooltip small { grid-column: 1 / -1 !important; margin: 0 !important; color: inherit !important; opacity: .72 !important; font: 10px/1.35 ui-sans-serif,system-ui,sans-serif !important; }
+#n1v-root .n1v-waterfall-bar:hover .n1v-waterfall-tooltip, #n1v-root .n1v-waterfall-bar:focus-visible .n1v-waterfall-tooltip { opacity: 1 !important; transform: translate(-50%,0) !important; }
+#n1v-root .n1v-waterfall-bar-start .n1v-waterfall-tooltip { left: 0 !important; transform: translate(0,4px) !important; }
+#n1v-root .n1v-waterfall-bar-start:hover .n1v-waterfall-tooltip, #n1v-root .n1v-waterfall-bar-start:focus-visible .n1v-waterfall-tooltip { transform: translate(0,0) !important; }
+#n1v-root .n1v-waterfall-bar-start .n1v-waterfall-tooltip::after { left: 5px !important; transform: none !important; }
+#n1v-root .n1v-waterfall-bar-end .n1v-waterfall-tooltip { right: 0 !important; left: auto !important; transform: translate(0,4px) !important; }
+#n1v-root .n1v-waterfall-bar-end:hover .n1v-waterfall-tooltip, #n1v-root .n1v-waterfall-bar-end:focus-visible .n1v-waterfall-tooltip { transform: translate(0,0) !important; }
+#n1v-root .n1v-waterfall-bar-end .n1v-waterfall-tooltip::after { right: 5px !important; left: auto !important; transform: none !important; }
 #n1v-root .n1v-waterfall-total { color: var(--n1v-muted) !important; text-align: right !important; white-space: nowrap !important; font: 10px/1.3 ui-sans-serif, system-ui, sans-serif !important; }
 #n1v-root .n1v-graph { min-height: 74px !important; overflow: auto !important; padding: 4px 0 !important; }
 #n1v-root .n1v-tree { margin: 0 !important; padding: 0 !important; list-style: none !important; }
@@ -149,4 +161,5 @@
 
 @media (prefers-reduced-motion: reduce) {
   #n1v-root .n1v-launcher { animation: none !important; }
+  #n1v-root .n1v-waterfall-tooltip { transition: none !important; }
 }

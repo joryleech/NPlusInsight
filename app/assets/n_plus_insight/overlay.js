@@ -196,12 +196,23 @@
         var duration = Math.max(Number(query.duration_ms) || 0, 0);
         var startPercent = Math.min(offset / span * 100, 100);
         var widthPercent = Math.min(duration / span * 100, 100 - startPercent);
-        var bar = element("span", "n1v-waterfall-bar");
+        var edgeClass = startPercent < 20 ? " n1v-waterfall-bar-start" :
+          (startPercent > 80 ? " n1v-waterfall-bar-end" : "");
+        var bar = element("span", "n1v-waterfall-bar" + edgeClass);
+        var queryNumber = query.index || queryIndex + 1;
         bar.style.setProperty("--n1v-waterfall-start", startPercent.toFixed(4) + "%");
         bar.style.setProperty("--n1v-waterfall-width", widthPercent.toFixed(4) + "%");
-        bar.title = "Query " + (query.index || queryIndex + 1) + ": +" +
-          offset.toFixed(2) + " ms, " + duration.toFixed(2) + " ms";
-        bar.setAttribute("aria-label", bar.title);
+        bar.tabIndex = 0;
+
+        var tooltip = element("span", "n1v-waterfall-tooltip");
+        var tooltipId = "n1v-waterfall-tooltip-" + groupIndex + "-" + queryIndex;
+        tooltip.id = tooltipId;
+        tooltip.setAttribute("role", "tooltip");
+        tooltip.appendChild(element("strong", "", "Query " + queryNumber));
+        tooltip.appendChild(element("span", "", formatMilliseconds(duration) + " ms"));
+        tooltip.appendChild(element("small", "", "Started +" + formatMilliseconds(offset) + " ms"));
+        bar.setAttribute("aria-describedby", tooltipId);
+        bar.appendChild(tooltip);
         track.appendChild(bar);
       });
       row.appendChild(track);
