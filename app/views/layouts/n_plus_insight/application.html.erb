@@ -19,14 +19,28 @@
       .list { display:grid; gap:12px; } .card { display:block; background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:18px; color:var(--text); text-decoration:none; }
       .card:hover { border-color:var(--accent); } .row { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; }
       .badge { display:inline-flex; padding:2px 8px; border-radius:999px; background:var(--accent-soft); color:var(--text); font-size:12px; }
+      .dashboard-actions { display:flex; align-items:center; gap:10px; }
+      .button { appearance:none; border:1px solid var(--line); border-radius:8px; padding:7px 11px; background:var(--panel); color:var(--text); cursor:pointer; font:600 13px/1 ui-sans-serif,system-ui,-apple-system,sans-serif; }
+      .button:hover { border-color:var(--bad); color:var(--bad); }
+      .button:disabled { cursor:not-allowed; opacity:.5; }
+      .notice { margin:0 0 18px; padding:10px 12px; border:1px solid var(--accent); border-radius:8px; background:var(--accent-soft); }
       .danger { color:var(--bad); font-weight:650; } .meta { display:flex; flex-wrap:wrap; gap:8px 18px; color:var(--muted); font-size:13px; }
       .grid { display:grid; grid-template-columns:minmax(0,1.25fr) minmax(280px,.75fr); gap:20px; align-items:start; }
       .stack { display:grid; gap:16px; } section { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:20px; }
       pre { margin:0; overflow:auto; padding:14px; border-radius:8px; background:var(--code); color:#e5e7eb; font:13px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace; }
       .source { padding:0; } .source div { display:grid; grid-template-columns:44px 1fr; padding:1px 14px; }
       .source div.active { background:rgba(180,35,24,.28); } .source b { color:#9ca3af; font-weight:400; user-select:none; }
-      .graph { width:100%; min-height:240px; } .graph line { stroke:var(--line); stroke-width:2; }
-      .graph rect { fill:var(--accent-soft); stroke:var(--accent); } .graph text { fill:var(--text); font:13px ui-sans-serif,system-ui; }
+      .query-pattern + .query-pattern { border-top:1px solid var(--line); padding-top:18px; margin-top:18px; }
+      .query-pattern h3 { margin-bottom:8px; }
+      .tree-wrap { overflow:auto; padding:4px 0; }
+      .model-tree { list-style:none; margin:0; padding:0; }
+      .model-tree .model-tree { margin-left:22px; padding-left:20px; border-left:1px solid var(--line); }
+      .model-tree li { position:relative; margin:12px 0; }
+      .model-tree .model-tree > li::before { content:""; position:absolute; left:-20px; top:30px; width:20px; border-top:1px solid var(--line); }
+      .tree-node { display:inline-grid; min-width:170px; padding:10px 12px; border:1px solid var(--accent); border-radius:9px; background:var(--accent-soft); text-align:center; }
+      .tree-node strong,.tree-node small { display:block; }
+      .tree-node small { color:var(--muted); }
+      .tree-edge { display:block; margin:0 0 5px; color:var(--muted); font-size:12px; }
       .suggestion + .suggestion { border-top:1px solid var(--line); padding-top:18px; margin-top:18px; }
       .crumb { display:inline-block; margin-bottom:18px; }
       @media (max-width:760px) { .grid { grid-template-columns:1fr; } main, header div { width:min(100% - 20px,1120px); } .row { flex-direction:column; } }
@@ -34,6 +48,9 @@
   </head>
   <body>
     <header><div><a class="brand" href="<%= root_path %>">NPlusInsight</a><span class="badge">Active</span></div></header>
-    <main><%= yield %></main>
+    <main>
+      <% if notice %><p class="notice"><%= notice %></p><% end %>
+      <%= yield %>
+    </main>
   </body>
 </html>
