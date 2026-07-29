@@ -19,6 +19,11 @@
       .list { display:grid; gap:12px; } .card { display:block; background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:18px; color:var(--text); text-decoration:none; }
       .card:hover { border-color:var(--accent); } .row { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; }
       .badge { display:inline-flex; padding:2px 8px; border-radius:999px; background:var(--accent-soft); color:var(--text); font-size:12px; }
+      .dashboard-actions { display:flex; align-items:center; gap:10px; }
+      .button { appearance:none; border:1px solid var(--line); border-radius:8px; padding:7px 11px; background:var(--panel); color:var(--text); cursor:pointer; font:600 13px/1 ui-sans-serif,system-ui,-apple-system,sans-serif; }
+      .button:hover { border-color:var(--bad); color:var(--bad); }
+      .button:disabled { cursor:not-allowed; opacity:.5; }
+      .notice { margin:0 0 18px; padding:10px 12px; border:1px solid var(--accent); border-radius:8px; background:var(--accent-soft); }
       .danger { color:var(--bad); font-weight:650; } .meta { display:flex; flex-wrap:wrap; gap:8px 18px; color:var(--muted); font-size:13px; }
       .grid { display:grid; grid-template-columns:minmax(0,1.25fr) minmax(280px,.75fr); gap:20px; align-items:start; }
       .stack { display:grid; gap:16px; } section { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:20px; }
@@ -43,6 +48,9 @@
   </head>
   <body>
     <header><div><a class="brand" href="<%= root_path %>">NPlusInsight</a><span class="badge">Active</span></div></header>
-    <main><%= yield %></main>
+    <main>
+      <% if notice %><p class="notice"><%= notice %></p><% end %>
+      <%= yield %>
+    </main>
   </body>
 </html>

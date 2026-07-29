@@ -4,6 +4,10 @@
 [![Rails 7–8](https://img.shields.io/badge/Rails-7.0%E2%80%938.x-D30001?logo=rubyonrails&logoColor=white)](https://rubyonrails.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-2563EB.svg)](LICENSE.txt)
 
+[Source code](https://github.com/joryleech/NPlusInsight) ·
+[Issue tracker](https://github.com/joryleech/NPlusInsight/issues) ·
+[Changelog](CHANGELOG.md)
+
 NPlusInsight detects N+1 queries in Ruby on Rails applications and turns them
 into actionable, source-level diagnostics.
 
@@ -66,7 +70,7 @@ detected while rendering the current page.
 Open the indicator to inspect relevant source lines, affected models, and
 remediation suggestions without leaving the page.
 
-![NPlusInsight source location, model graph, and remediation popout](docs/images/on-page-popout.png)
+![NPlusInsight grouped query patterns and multi-model tree in the on-page inspector](docs/images/on-page-popout.png)
 
 ### Mounted findings dashboard
 
@@ -153,7 +157,7 @@ explicitly. Its default value is `false`.
 | --- | --- | --- |
 | `enabled` | `NPLUS_INSIGHT_ENABLED`, otherwise `false` | Enables request-level query collection and analysis. |
 | `minimum_repetitions` | `2` | Number of matching query shapes required to create a finding. |
-| `max_events` | `100` | Maximum number of findings retained in the in-memory store. |
+| `max_events` | `100` | Maximum number of findings retained for the dashboard. The oldest findings are removed first. |
 | `mount_path` | `"/n_plus_insight"` | Path used for the mounted dashboard and overlay assets. Configure this before the application finishes booting. |
 | `on_page` | `true` | Injects the status indicator and findings inspector into HTML responses. |
 | `raise_on_detection` | `false` | Raises when a request produces at least one finding. Useful in controlled tests or CI. |
@@ -200,7 +204,10 @@ collect findings for the mounted dashboard.
 
 The dashboard is available at `mount_path`, which defaults to
 `/n_plus_insight`. It lists the most recent findings stored by the current Rails
-process and links to a detailed report for each finding.
+process and links to a detailed report for each finding. Use **Clear** to remove
+all stored findings. The dashboard retains at most `max_events`
+findings, rolling off the oldest finding whenever the configured limit is
+exceeded.
 
 ## How detection works
 
@@ -339,7 +346,8 @@ The built package is written to `pkg/`.
 
 ## Contributing
 
-Bug reports and pull requests are welcome.
+[Bug reports](https://github.com/joryleech/NPlusInsight/issues/new/choose) and
+[pull requests](https://github.com/joryleech/NPlusInsight/pulls) are welcome.
 
 When proposing a change:
 
@@ -352,6 +360,13 @@ When proposing a change:
 Please avoid including production SQL, source code, credentials, or other
 sensitive application data in public issues.
 
+## Releasing
+
+Maintainer release instructions are available in
+[RELEASING.md](RELEASING.md).
+
 ## License
 
-NPlusInsight is available under the [MIT License](LICENSE.txt).
+NPlusInsight is maintained by
+[Jory Leech](https://github.com/joryleech) and available under the
+[MIT License](LICENSE.txt).

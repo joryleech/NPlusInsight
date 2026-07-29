@@ -10,4 +10,8 @@
   complete association tree.
 - Provide an optional on-page status indicator and findings panel.
 - Provide a full mounted findings dashboard.
+- Allow operators to clear stored findings from the dashboard.
+- Roll off the oldest dashboard findings according to `max_events`.
+- Publish canonical GitHub, documentation, changelog, and issue-tracker
+  metadata.
 - Support environment-neutral activation and deployment.

@@ -3,7 +3,15 @@
     <h1>Detected N+1 queries</h1>
     <p class="muted">Repeated query patterns grouped by request and source location.</p>
   </div>
-  <span class="badge"><%= @detections.length %> finding<%= "s" unless @detections.one? %></span>
+  <div class="dashboard-actions">
+    <span class="badge"><%= @detections.length %> finding<%= "s" unless @detections.one? %></span>
+    <%= button_to "Clear",
+      clear_detections_path,
+      method: :delete,
+      class: "button",
+      disabled: @detections.empty?,
+      form: { onsubmit: "return window.confirm('Clear all stored N+1 detections?')" } %>
+  </div>
 </div>
 
 <% if @detections.empty? %>
