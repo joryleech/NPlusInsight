@@ -22,9 +22,11 @@ module NPlusInsight
           query_count: detection.query_count,
           total_ms: detection.total_ms,
           sql: detection.sql,
+          query_groups: detection.query_groups,
           location: detection.location&.as_json,
           models: detection.models,
           edges: detection.edges,
+          tree: detection.tree,
           suggestions: detection.suggestions
         }
       end

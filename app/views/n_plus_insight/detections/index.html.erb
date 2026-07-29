@@ -1,7 +1,7 @@
 <div class="row">
   <div>
     <h1>Detected N+1 queries</h1>
-    <p class="muted">Repeated query shapes grouped by request, with the application frame that triggered them.</p>
+    <p class="muted">Repeated query patterns grouped by request and source location.</p>
   </div>
   <span class="badge"><%= @detections.length %> finding<%= "s" unless @detections.one? %></span>
 </div>
@@ -17,14 +17,18 @@
       <a class="card" href="<%= detection_path(detection.id) %>">
         <div class="row">
           <div>
-            <div><span class="danger"><%= detection.query_count %> repeated queries</span> on <strong><%= detection.method %> <%= detection.path %></strong></div>
+            <div>
+              <span class="danger"><%= detection.query_count %> repeated queries</span>
+              across <%= detection.query_groups.length %> pattern<%= "s" unless detection.query_groups.one? %>
+              on <strong><%= detection.method %> <%= detection.path %></strong>
+            </div>
             <div class="meta">
               <span><%= detection.total_ms %> ms</span>
               <% if detection.location %><span><%= detection.location.path %>:<%= detection.location.line %></span><% end %>
-              <span><%= detection.models.map { |model| model[:name] }.join(" → ") %></span>
+              <span><%= detection.models.map { |model| model[:name] }.join(", ") %></span>
             </div>
           </div>
-          <span aria-hidden="true">→</span>
+          <span aria-hidden="true">&rarr;</span>
         </div>
       </a>
     <% end %>

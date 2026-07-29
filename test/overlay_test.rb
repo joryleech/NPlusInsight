@@ -9,8 +9,17 @@ class OverlayTest < Minitest::Test
       query_count: 4,
       total_ms: 3.2,
       sql: "SELECT * FROM comments WHERE post_id = ?",
+      query_groups: [
+        {
+          sql: "SELECT * FROM comments WHERE post_id = ?",
+          query_count: 4,
+          total_ms: 3.2,
+          tables: ["comments"]
+        }
+      ],
       models: [{ name: "Comment", table: "comments" }],
       edges: [],
+      tree: [{ name: "Comment", table: "comments", children: [] }],
       suggestions: []
     )
 
@@ -21,5 +30,7 @@ class OverlayTest < Minitest::Test
     encoded = markup[/data-payload="([^"]+)"/, 1]
     payload = JSON.parse(Base64.strict_decode64(encoded))
     assert_equal 4, payload.first.fetch("query_count")
+    assert_equal 1, payload.first.fetch("query_groups").length
+    assert_equal "Comment", payload.first.fetch("tree").first.fetch("name")
   end
 end

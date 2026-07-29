@@ -213,9 +213,19 @@ For each uncached `SELECT` query, it:
 2. extracts tables referenced by `FROM` and `JOIN`;
 3. replaces literal strings and numbers with placeholders;
 4. groups queries with the same normalized shape;
-5. reports groups meeting `minimum_repetitions`;
-6. inspects Active Record reflections to infer relevant model associations;
-7. generates eager-loading and strict-loading suggestions.
+5. keeps shapes meeting `minimum_repetitions`;
+6. combines repeated shapes attributed to the same application source line into
+   one finding;
+7. inspects Active Record reflections to infer every relevant model association;
+8. renders the affected associations as a model tree;
+9. generates combined eager-loading and strict-loading suggestions for the
+   complete tree.
+
+For example, if one serializer line lazily loads both `post.comments` and
+`post.likes`, NPlusInsight reports one finding with two query patterns, a
+`Post` tree branching to `Comment` and `Like`, and a combined remediation such
+as `Post.includes(:comments, :likes)`. Deeper paths are represented with nested
+`includes`, such as `User.includes({ posts: [:comments, :likes] })`.
 
 Cached queries, schema activity, Rails metadata queries, transaction statements,
 and ignored requests are excluded.

@@ -23,10 +23,24 @@
     }
   }
 
+  function queryGroupsFor(finding) {
+    if ((finding.query_groups || []).length) return finding.query_groups;
+    return [{
+      sql: finding.sql,
+      query_count: finding.query_count,
+      total_ms: finding.total_ms,
+      tables: []
+    }];
+  }
+
   var findings = decodePayload(root.dataset.payload || "");
+  var patternCount = findings.reduce(function (total, finding) {
+    return total + queryGroupsFor(finding).length;
+  }, 0);
+
   var launcher = element("button", "n1v-launcher" + (findings.length ? " n1v-has-alert" : ""), "N+1");
   launcher.type = "button";
-  launcher.setAttribute("aria-label", findings.length ? "Open NPlusInsight: " + findings.length + " detected" : "Open NPlusInsight: no detections");
+  launcher.setAttribute("aria-label", findings.length ? "Open NPlusInsight: " + findings.length + " affected source locations" : "Open NPlusInsight: no detections");
   launcher.setAttribute("aria-expanded", "false");
 
   if (findings.length) {
@@ -44,7 +58,14 @@
   var header = element("div", "n1v-header");
   var headingWrap = element("div");
   headingWrap.appendChild(element("h2", "n1v-title", findings.length ? "N+1 detected" : "No N+1 queries"));
-  headingWrap.appendChild(element("p", "n1v-subtitle", findings.length ? findings.length + " repeated query pattern" + (findings.length === 1 ? "" : "s") + " on this page" : "This request is clear"));
+  headingWrap.appendChild(element(
+    "p",
+    "n1v-subtitle",
+    findings.length ?
+      findings.length + " affected source location" + (findings.length === 1 ? "" : "s") +
+        " · " + patternCount + " query pattern" + (patternCount === 1 ? "" : "s") :
+      "This request is clear"
+  ));
   header.appendChild(headingWrap);
 
   var close = element("button", "n1v-close", "×");
@@ -70,6 +91,7 @@
       container.appendChild(section);
       return;
     }
+
     section.appendChild(element("p", "n1v-location", finding.location.path + ":" + finding.location.line));
     var pre = element("pre", "n1v-code");
     var code = element("code");
@@ -84,22 +106,60 @@
     container.appendChild(section);
   }
 
+  function renderQueries(container, finding) {
+    var section = element("section", "n1v-section");
+    section.appendChild(element("h3", "n1v-heading", "Repeated query patterns"));
+    queryGroupsFor(finding).forEach(function (group, index) {
+      var query = element("div", "n1v-query");
+      var tables = (group.tables || []).join(", ");
+      var metadata = "Pattern " + (index + 1) + " · " + group.query_count +
+        " queries · " + group.total_ms + " ms" + (tables ? " · " + tables : "");
+      query.appendChild(element("p", "n1v-query-meta", metadata));
+      appendCode(query, group.sql);
+      section.appendChild(query);
+    });
+    container.appendChild(section);
+  }
+
+  function renderTreeNode(entry) {
+    var item = element("li", "n1v-tree-item");
+    if (entry.association) {
+      item.appendChild(element(
+        "span",
+        "n1v-edge",
+        entry.association + (entry.macro ? " (" + entry.macro + ")" : "")
+      ));
+    }
+
+    var node = element("div", "n1v-node");
+    node.appendChild(element("strong", "", entry.name));
+    node.appendChild(element("small", "", entry.table));
+    item.appendChild(node);
+
+    if ((entry.children || []).length) {
+      var children = element("ul", "n1v-tree");
+      entry.children.forEach(function (child) {
+        children.appendChild(renderTreeNode(child));
+      });
+      item.appendChild(children);
+    }
+    return item;
+  }
+
   function renderGraph(container, finding) {
     var section = element("section", "n1v-section");
-    section.appendChild(element("h3", "n1v-heading", "Affected models"));
+    section.appendChild(element("h3", "n1v-heading", "Affected model tree"));
     var graph = element("div", "n1v-graph");
     graph.setAttribute("role", "img");
-    graph.setAttribute("aria-label", "Model associations involved in the repeated query");
-    (finding.models || []).forEach(function (model, index) {
-      if (index > 0) {
-        var edge = (finding.edges || [])[index - 1];
-        graph.appendChild(element("span", "n1v-edge", (edge && edge.association ? edge.association + " " : "") + "→"));
-      }
-      var node = element("div", "n1v-node");
-      node.appendChild(element("strong", "", model.name));
-      node.appendChild(element("small", "", model.table));
-      graph.appendChild(node);
+    graph.setAttribute("aria-label", "Tree of models and associations involved in the repeated queries");
+    var tree = element("ul", "n1v-tree");
+    var roots = finding.tree || (finding.models || []).map(function (model) {
+      return { name: model.name, table: model.table, children: [] };
     });
+    roots.forEach(function (entry) {
+      tree.appendChild(renderTreeNode(entry));
+    });
+    graph.appendChild(tree);
     section.appendChild(graph);
     container.appendChild(section);
   }
@@ -112,6 +172,7 @@
       var copy = element("button", "n1v-copy", "Copy");
       copy.type = "button";
       copy.addEventListener("click", function () {
+        if (!navigator.clipboard) return;
         navigator.clipboard.writeText(suggestion.code).then(function () {
           copy.textContent = "Copied";
           window.setTimeout(function () { copy.textContent = "Copy"; }, 1200);
@@ -136,7 +197,12 @@
       var tabs = element("div", "n1v-tabs");
       tabs.setAttribute("role", "tablist");
       findings.forEach(function (finding, tabIndex) {
-        var tab = element("button", "n1v-tab", "#" + (tabIndex + 1) + " · " + finding.query_count + " queries");
+        var groupCount = queryGroupsFor(finding).length;
+        var tab = element(
+          "button",
+          "n1v-tab",
+          "#" + (tabIndex + 1) + " · " + groupCount + " pattern" + (groupCount === 1 ? "" : "s")
+        );
         tab.type = "button";
         tab.setAttribute("role", "tab");
         tab.setAttribute("aria-selected", String(tabIndex === index));
@@ -148,6 +214,7 @@
 
     var finding = findings[index];
     renderSource(body, finding);
+    renderQueries(body, finding);
     renderGraph(body, finding);
     renderFixes(body, finding);
   }
