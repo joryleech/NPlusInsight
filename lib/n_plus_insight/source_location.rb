@@ -1,21 +1,30 @@
 module NPlusInsight
-  SourceLocation = Struct.new(:path, :line, :label, :snippet, keyword_init: true) do
+  SourceLocation = Struct.new(:path, :line, :label, :snippet, :backtrace, keyword_init: true) do
     FRAME_PATTERN = /\A(.+?):(\d+)(?::in [`'](.+)[`'])?\z/
+    MAX_BACKTRACE_FRAMES = 30
 
     def self.from(caller_lines)
       root = defined?(Rails) && Rails.respond_to?(:root) && Rails.root ? Rails.root.to_s.tr("\\", "/") : nil
-      frame = caller_lines.find do |entry|
+      frames = caller_lines.filter_map do |entry|
         path = entry.to_s.tr("\\", "/")
-        root ? path.start_with?("#{root}/app/", "#{root}/lib/") : !path.include?("/gems/")
-      end
-      return unless frame
+        next unless root ? path.start_with?("#{root}/app/", "#{root}/lib/") : !path.include?("/gems/")
 
-      match = FRAME_PATTERN.match(frame.to_s)
-      return unless match
+        match = FRAME_PATTERN.match(entry.to_s)
+        next unless match
 
-      path, line, label = match.captures
-      line = line.to_i
-      new(path: path, line: line, label: label, snippet: read_snippet(path, line))
+        path, line, label = match.captures
+        { path: path, line: line.to_i, label: label }
+      end.first(MAX_BACKTRACE_FRAMES)
+      return if frames.empty?
+
+      frame = frames.first
+      new(
+        path: frame[:path],
+        line: frame[:line],
+        label: frame[:label],
+        snippet: read_snippet(frame[:path], frame[:line]),
+        backtrace: frames
+      )
     end
 
     def self.read_snippet(path, line)
@@ -29,7 +38,7 @@ module NPlusInsight
     end
 
     def as_json(*)
-      { path: path, line: line, label: label, snippet: snippet }
+      { path: path, line: line, label: label, snippet: snippet, backtrace: backtrace }
     end
   end
 end

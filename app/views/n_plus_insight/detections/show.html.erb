@@ -102,6 +102,29 @@
         </div>
       <% end %>
     </section>
+
+    <% if @detection.location %>
+      <% frames = @detection.location.backtrace.presence || [{ path: @detection.location.path, line: @detection.location.line, label: @detection.location.label }] %>
+      <section>
+        <details class="method-backtrace">
+          <summary>
+            <span>
+              <strong>Method backtrace</strong>
+              <small>Expand to trace the query through serializers and other application methods</small>
+            </span>
+            <span class="badge"><%= frames.length %> frame<%= "s" unless frames.one? %></span>
+          </summary>
+          <ol>
+            <% frames.each do |frame| %>
+              <li>
+                <code><%= frame[:label].presence || "(unknown method)" %></code>
+                <span><%= frame[:path] %>:<%= frame[:line] %></span>
+              </li>
+            <% end %>
+          </ol>
+        </details>
+      </section>
+    <% end %>
   </div>
 
   <section>
