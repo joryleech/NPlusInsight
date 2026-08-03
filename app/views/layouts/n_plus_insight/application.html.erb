@@ -67,6 +67,15 @@
       .tree-node small { color:var(--muted); }
       .tree-edge { display:block; margin:0 0 5px; color:var(--muted); font-size:12px; }
       .suggestion + .suggestion { border-top:1px solid var(--line); padding-top:18px; margin-top:18px; }
+      .method-backtrace summary { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; cursor:pointer; list-style-position:outside; }
+      .method-backtrace summary strong,.method-backtrace summary small { display:block; }
+      .method-backtrace summary small { margin-top:3px; color:var(--muted); font-size:13px; font-weight:400; }
+      .method-backtrace ol { margin:18px 0 0; padding-left:28px; }
+      .method-backtrace li { padding:7px 0 7px 5px; }
+      .method-backtrace li + li { border-top:1px solid var(--line); }
+      .method-backtrace li code,.method-backtrace li span { display:block; overflow-wrap:anywhere; }
+      .method-backtrace li code { color:var(--text); font-weight:650; }
+      .method-backtrace li span { color:var(--muted); font:12px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace; }
       .crumb { display:inline-block; margin-bottom:18px; }
       @media (max-width:760px) { .grid { grid-template-columns:1fr; } main, header div { width:min(100% - 20px,1120px); } .row { flex-direction:column; } .waterfall-axis { margin-left:88px; } .waterfall-row { grid-template-columns:76px minmax(130px,1fr) 56px; gap:7px; } }
       @media (prefers-reduced-motion:reduce) { .waterfall-tooltip { transition:none; } }
