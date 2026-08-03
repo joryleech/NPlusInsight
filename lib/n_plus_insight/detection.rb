@@ -1,6 +1,6 @@
 module NPlusInsight
   Detection = Struct.new(
-    :id, :request_id, :method, :path, :created_at, :query_count, :total_ms,
+    :id, :request_id, :method, :path, :created_at, :query_count, :total_ms, :waterfall_ms,
     :sql, :query_groups, :location, :models, :edges, :tree, :suggestions,
     keyword_init: true
   ) do

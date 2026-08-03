@@ -41,10 +41,11 @@ class AnalyzerTest < Minitest::Test
     )
   end
 
-  def build_query(table:, foreign_key:, id:, source_location: location)
+  def build_query(table:, foreign_key:, id:, source_location: location, started_at: nil, duration_ms: 1.25)
     NPlusInsight::Query.new(
       sql: %(SELECT "#{table}".* FROM "#{table}" WHERE "#{table}"."#{foreign_key}" = #{id}),
-      duration_ms: 1.25,
+      started_at: started_at,
+      duration_ms: duration_ms,
       tables: [table],
       location: source_location
     )
@@ -115,6 +116,25 @@ class AnalyzerTest < Minitest::Test
     assert_equal "AnalyzerFixtures::Post", post[:name]
     assert_equal ["AnalyzerFixtures::Comment", "AnalyzerFixtures::Like"], post[:children].map { |child| child[:name] }.sort
     assert_includes detection.suggestions.first[:code], "includes({ posts: [:comments, :likes] })"
+  end
+
+  def test_builds_a_timed_waterfall_across_query_patterns
+    detection = analyze([
+      build_query(table: "comments", foreign_key: "post_id", id: 1, started_at: 100.000, duration_ms: 2.0),
+      build_query(table: "likes", foreign_key: "post_id", id: 1, started_at: 100.004, duration_ms: 4.0),
+      build_query(table: "comments", foreign_key: "post_id", id: 2, started_at: 100.010, duration_ms: 3.0),
+      build_query(table: "likes", foreign_key: "post_id", id: 2, started_at: 100.020, duration_ms: 5.0)
+    ]).first
+
+    comments = detection.query_groups.find { |group| group[:tables] == ["comments"] }
+    likes = detection.query_groups.find { |group| group[:tables] == ["likes"] }
+
+    assert_in_delta 25.0, detection.waterfall_ms, 0.01
+    assert_in_delta 14.0, detection.total_ms, 0.01
+    assert_equal [0.0, 10.0], comments[:waterfall].map { |query| query[:offset_ms] }
+    assert_equal [2.0, 3.0], comments[:waterfall].map { |query| query[:duration_ms] }
+    assert_equal [4.0, 20.0], likes[:waterfall].map { |query| query[:offset_ms] }
+    assert_equal [4.0, 5.0], likes[:waterfall].map { |query| query[:duration_ms] }
   end
 
   def test_keeps_repeated_shapes_on_different_lines_separate

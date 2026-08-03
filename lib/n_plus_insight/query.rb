@@ -1,5 +1,5 @@
 module NPlusInsight
-  Query = Struct.new(:sql, :name, :duration_ms, :cached, :location, :tables, keyword_init: true) do
+  Query = Struct.new(:sql, :name, :started_at, :duration_ms, :cached, :location, :tables, keyword_init: true) do
     def normalized_sql
       sql.to_s
         .gsub(/'(?:[^']|'')*'/, "?")

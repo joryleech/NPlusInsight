@@ -23,14 +23,36 @@
     }
   }
 
+  function formatMilliseconds(value) {
+    return (Number(value) || 0)
+      .toFixed(2)
+      .replace(/\.00$/, "")
+      .replace(/(\.\d)0$/, "$1");
+  }
+
   function queryGroupsFor(finding) {
     if ((finding.query_groups || []).length) return finding.query_groups;
     return [{
       sql: finding.sql,
       query_count: finding.query_count,
       total_ms: finding.total_ms,
-      tables: []
+      tables: [],
+      waterfall: []
     }];
+  }
+
+  function waterfallEntriesFor(group) {
+    if ((group.waterfall || []).length) return group.waterfall;
+
+    var count = Number(group.query_count) || 0;
+    var duration = count ? (Number(group.total_ms) || 0) / count : 0;
+    return Array.from({ length: count }, function (_value, index) {
+      return {
+        index: index + 1,
+        offset_ms: duration * index,
+        duration_ms: duration
+      };
+    });
   }
 
   var findings = decodePayload(root.dataset.payload || "");
@@ -130,6 +152,78 @@
     container.appendChild(section);
   }
 
+  function renderWaterfall(container, finding) {
+    var groups = queryGroupsFor(finding);
+    var span = Number(finding.waterfall_ms) || groups.reduce(function (maximum, group) {
+      return Math.max(maximum, waterfallEntriesFor(group).reduce(function (groupMaximum, query) {
+        return Math.max(groupMaximum, Number(query.offset_ms) + Number(query.duration_ms));
+      }, 0));
+    }, 0);
+    span = Math.max(span, 0.01);
+
+    var section = element("section", "n1v-section");
+    section.appendChild(element("h3", "n1v-heading", "Query loading waterfall"));
+    section.appendChild(element(
+      "p",
+      "n1v-waterfall-summary",
+      formatMilliseconds(finding.waterfall_ms || span) +
+        " ms elapsed · " + finding.total_ms + " ms database time · Hover a bar for timing"
+    ));
+
+    var waterfall = element("div", "n1v-waterfall");
+    waterfall.setAttribute("role", "img");
+    waterfall.setAttribute(
+      "aria-label",
+      "Waterfall of repeated query patterns over " + Number(finding.waterfall_ms || span) + " milliseconds"
+    );
+
+    var axis = element("div", "n1v-waterfall-axis");
+    axis.setAttribute("aria-hidden", "true");
+    axis.appendChild(element("span", "", "0 ms"));
+    axis.appendChild(element("span", "", formatMilliseconds(finding.waterfall_ms || span) + " ms"));
+    waterfall.appendChild(axis);
+
+    groups.forEach(function (group, groupIndex) {
+      var row = element("div", "n1v-waterfall-row");
+      var label = element("div", "n1v-waterfall-label");
+      label.appendChild(element("strong", "", "Pattern " + (groupIndex + 1)));
+      label.appendChild(element("small", "", (group.tables || []).join(", ") || "Repeated query"));
+      row.appendChild(label);
+
+      var track = element("div", "n1v-waterfall-track");
+      waterfallEntriesFor(group).forEach(function (query, queryIndex) {
+        var offset = Math.max(Number(query.offset_ms) || 0, 0);
+        var duration = Math.max(Number(query.duration_ms) || 0, 0);
+        var startPercent = Math.min(offset / span * 100, 100);
+        var widthPercent = Math.min(duration / span * 100, 100 - startPercent);
+        var edgeClass = startPercent < 20 ? " n1v-waterfall-bar-start" :
+          (startPercent > 80 ? " n1v-waterfall-bar-end" : "");
+        var bar = element("span", "n1v-waterfall-bar" + edgeClass);
+        var queryNumber = query.index || queryIndex + 1;
+        bar.style.setProperty("--n1v-waterfall-start", startPercent.toFixed(4) + "%");
+        bar.style.setProperty("--n1v-waterfall-width", widthPercent.toFixed(4) + "%");
+        bar.tabIndex = 0;
+
+        var tooltip = element("span", "n1v-waterfall-tooltip");
+        var tooltipId = "n1v-waterfall-tooltip-" + groupIndex + "-" + queryIndex;
+        tooltip.id = tooltipId;
+        tooltip.setAttribute("role", "tooltip");
+        tooltip.appendChild(element("strong", "", "Query " + queryNumber));
+        tooltip.appendChild(element("span", "", formatMilliseconds(duration) + " ms"));
+        tooltip.appendChild(element("small", "", "Started +" + formatMilliseconds(offset) + " ms"));
+        bar.setAttribute("aria-describedby", tooltipId);
+        bar.appendChild(tooltip);
+        track.appendChild(bar);
+      });
+      row.appendChild(track);
+      row.appendChild(element("span", "n1v-waterfall-total", group.total_ms + " ms"));
+      waterfall.appendChild(row);
+    });
+
+    section.appendChild(waterfall);
+    container.appendChild(section);
+  }
+
   function renderTreeNode(entry) {
     var item = element("li", "n1v-tree-item");
     if (entry.association) {
@@ -223,6 +317,7 @@
 
     var finding = findings[index];
     renderSource(body, finding);
+    renderWaterfall(body, finding);
     renderGraph(body, finding);
     renderQueries(body, finding);
     renderFixes(body, finding);
