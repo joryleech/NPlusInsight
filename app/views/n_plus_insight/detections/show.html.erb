@@ -41,6 +41,58 @@
     </section>
 
     <section>
+      <div class="row">
+        <div>
+          <h2>Query loading waterfall</h2>
+          <p class="muted waterfall-summary">
+            <%= @detection.waterfall_ms %> ms elapsed
+            &middot; <%= @detection.total_ms %> ms database time
+            &middot; Hover a bar for its start time and duration
+          </p>
+        </div>
+        <span class="badge"><%= @detection.query_count %> queries</span>
+      </div>
+      <div
+        class="waterfall"
+        role="img"
+        aria-label="Waterfall of repeated query patterns over <%= @detection.waterfall_ms %> milliseconds">
+        <div class="waterfall-axis" aria-hidden="true">
+          <span>0 ms</span>
+          <span><%= @detection.waterfall_ms %> ms</span>
+        </div>
+        <% span_ms = [@detection.waterfall_ms.to_f, 0.01].max %>
+        <% @detection.query_groups.each_with_index do |group, pattern_index| %>
+          <div class="waterfall-row">
+            <div class="waterfall-label">
+              <strong>Pattern <%= pattern_index + 1 %></strong>
+              <small><%= group[:tables].join(", ") %></small>
+            </div>
+            <div class="waterfall-track">
+              <% (group[:waterfall] || []).each do |query| %>
+                <% start_percent = [[query[:offset_ms].to_f / span_ms * 100, 0].max, 100].min %>
+                <% width_percent = [[query[:duration_ms].to_f / span_ms * 100, 0].max, 100 - start_percent].min %>
+                <% edge_class = start_percent < 20 ? "waterfall-bar-start" : (start_percent > 80 ? "waterfall-bar-end" : nil) %>
+                <% tooltip_id = "waterfall-tooltip-#{pattern_index}-#{query[:index]}" %>
+                <span
+                  class="waterfall-bar <%= edge_class %>"
+                  style="--waterfall-start:<%= start_percent.round(4) %>%;--waterfall-width:<%= width_percent.round(4) %>%"
+                  tabindex="0"
+                  aria-describedby="<%= tooltip_id %>">
+                  <span class="waterfall-tooltip" id="<%= tooltip_id %>" role="tooltip">
+                    <strong>Query <%= query[:index] %></strong>
+                    <span><%= query[:duration_ms] %> ms</span>
+                    <small>Started +<%= query[:offset_ms] %> ms</small>
+                  </span>
+                </span>
+              <% end %>
+            </div>
+            <span class="waterfall-total"><%= group[:total_ms] %> ms</span>
+          </div>
+        <% end %>
+      </div>
+    </section>
+
+    <section>
       <h2>Suggested fixes</h2>
       <% @detection.suggestions.each do |suggestion| %>
         <div class="suggestion">

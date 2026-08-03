@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Add per-pattern query loading waterfalls to the mounted dashboard and
+  on-page inspector, including individual query offsets, durations, elapsed
+  span, and cumulative database time.
+- Add styled hover and keyboard-focus tooltips to every waterfall query bar.
+
 ## 0.1.0 - 2026-07-28
 
 - Detect repeated Active Record query shapes within a request.

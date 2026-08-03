@@ -24,6 +24,7 @@ module NPlusInsight
 
     def build_detection(query_groups)
       location = dominant_location(query_groups.flatten)
+      timeline_origin = query_groups.flatten.filter_map(&:started_at).map(&:to_f).min
       graph_models = {}
       graph_edges = []
 
@@ -39,7 +40,8 @@ module NPlusInsight
           sql: queries.first.normalized_sql,
           query_count: queries.length,
           total_ms: queries.sum(&:duration_ms).round(2),
-          tables: tables
+          tables: tables,
+          waterfall: serialize_waterfall(queries, timeline_origin)
         }
       end
 
@@ -54,6 +56,7 @@ module NPlusInsight
         created_at: Time.now.utc.iso8601,
         query_count: serialized_groups.sum { |group| group[:query_count] },
         total_ms: serialized_groups.sum { |group| group[:total_ms] }.round(2),
+        waterfall_ms: waterfall_span(query_groups.flatten, timeline_origin),
         sql: serialized_groups.first[:sql],
         query_groups: serialized_groups,
         location: location,
@@ -62,6 +65,43 @@ module NPlusInsight
         tree: build_forest(models, edges),
         suggestions: suggestions(edges, location)
       )
+    end
+
+    def serialize_waterfall(queries, timeline_origin)
+      fallback_offset = 0.0
+
+      queries
+        .each_with_index
+        .sort_by { |query, index| [query.started_at ? query.started_at.to_f : Float::INFINITY, index] }
+        .map.with_index do |(query, _original_index), index|
+          duration = query.duration_ms.to_f
+          offset = if timeline_origin && query.started_at
+            (query.started_at.to_f - timeline_origin) * 1000
+          else
+            fallback_offset
+          end
+          fallback_offset = [fallback_offset, offset + duration].max
+
+          {
+            index: index + 1,
+            name: query.name,
+            offset_ms: offset.round(2),
+            duration_ms: duration.round(2)
+          }
+        end
+    end
+
+    def waterfall_span(queries, timeline_origin)
+      if timeline_origin
+        finishes = queries.filter_map do |query|
+          next unless query.started_at
+
+          ((query.started_at.to_f - timeline_origin) * 1000) + query.duration_ms.to_f
+        end
+        return finishes.max.to_f.round(2) if finishes.any?
+      end
+
+      queries.sum { |query| query.duration_ms.to_f }.round(2)
     end
 
     def dominant_location(queries)

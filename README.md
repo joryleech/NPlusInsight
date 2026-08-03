@@ -15,6 +15,7 @@ For each finding, NPlusInsight shows:
 
 - the application file, line number, and surrounding source code;
 - the repeated SQL shape, query count, and cumulative duration;
+- a query loading waterfall with per-query start offsets and durations;
 - the Active Record models and associations involved;
 - suggested eager-loading and strict-loading remediations;
 - an optional on-page alert and a mounted findings dashboard.
@@ -224,8 +225,9 @@ For each uncached `SELECT` query, it:
 6. combines repeated shapes attributed to the same application source line into
    one finding;
 7. inspects Active Record reflections to infer every relevant model association;
-8. renders the affected associations as a model tree;
-9. generates combined eager-loading and strict-loading suggestions for the
+8. plots each repeated query on a per-pattern loading waterfall;
+9. renders the affected associations as a model tree;
+10. generates combined eager-loading and strict-loading suggestions for the
    complete tree.
 
 For example, if one serializer line lazily loads both `post.comments` and

@@ -8,13 +8,18 @@ class OverlayTest < Minitest::Test
       path: "/posts",
       query_count: 4,
       total_ms: 3.2,
+      waterfall_ms: 6.4,
       sql: "SELECT * FROM comments WHERE post_id = ?",
       query_groups: [
         {
           sql: "SELECT * FROM comments WHERE post_id = ?",
           query_count: 4,
           total_ms: 3.2,
-          tables: ["comments"]
+          tables: ["comments"],
+          waterfall: [
+            { index: 1, offset_ms: 0.0, duration_ms: 0.8 },
+            { index: 2, offset_ms: 2.0, duration_ms: 1.2 }
+          ]
         }
       ],
       models: [{ name: "Comment", table: "comments" }],
@@ -30,7 +35,9 @@ class OverlayTest < Minitest::Test
     encoded = markup[/data-payload="([^"]+)"/, 1]
     payload = JSON.parse(Base64.strict_decode64(encoded))
     assert_equal 4, payload.first.fetch("query_count")
+    assert_equal 6.4, payload.first.fetch("waterfall_ms")
     assert_equal 1, payload.first.fetch("query_groups").length
+    assert_equal 2, payload.first.fetch("query_groups").first.fetch("waterfall").length
     assert_equal "Comment", payload.first.fetch("tree").first.fetch("name")
   end
 end

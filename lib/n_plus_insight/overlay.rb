@@ -21,6 +21,7 @@ module NPlusInsight
           path: detection.path,
           query_count: detection.query_count,
           total_ms: detection.total_ms,
+          waterfall_ms: detection.waterfall_ms,
           sql: detection.sql,
           query_groups: detection.query_groups,
           location: detection.location&.as_json,

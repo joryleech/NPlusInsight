@@ -22,6 +22,7 @@ module NPlusInsight
         collector << Query.new(
           sql: sql,
           name: payload[:name],
+          started_at: started.to_f,
           duration_ms: (finished - started) * 1000,
           cached: payload[:cached],
           location: SourceLocation.from(caller),
